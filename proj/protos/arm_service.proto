@@ -1,0 +1,4 @@
+syntax = "proto3";
+
+package arm;
+option go_package = "github.com/Hristiyan-Bonev/golang-course"
