@@ -42,13 +42,8 @@ func newSortingService() *sortingService {
 type sortingService struct {
 	State        RobotState
 	Items        []*gen.Item
-	Cubbies      map[string][]*gen.Item
+	Cubbies      cubbyList
 	SelectedItem *gen.Item
-}
-
-func foo(a ...interface{}) []interface{} {
-	fmt.Println(a)
-	return a
 }
 
 func (s *sortingService) LoadItems(context context.Context, loadRequest *gen.LoadItemsRequest) (*gen.LoadItemsResponse, error) {
