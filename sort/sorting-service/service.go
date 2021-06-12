@@ -9,16 +9,7 @@ import (
 	"time"
 )
 
-func newSortingService() *sortingService {
-	cubbies := make(map[string][]*gen.Item)
-
-	return &sortingService{
-		Cubbies: cubbies,
-		State:   InitializationState,
-		Items:   []*gen.Item{},
-	}
-}
-
+type cubbyList map[string][]*gen.Item
 type RobotState string
 
 const (
@@ -29,11 +20,35 @@ const (
 	InitializationState            = "INITIALIZING"
 )
 
+func generateCubbies(cubbyIDs ...string) cubbyList {
+	cubbies := make(cubbyList)
+
+	for _, id := range cubbyIDs {
+		cubbies[id] = []*gen.Item{}
+	}
+
+	return cubbies
+}
+
+func newSortingService() *sortingService {
+
+	return &sortingService{
+		Cubbies: generateCubbies("A1", "A2", "A3", "A4", "A5"),
+		State:   InitializationState,
+		Items:   []*gen.Item{},
+	}
+}
+
 type sortingService struct {
 	State        RobotState
 	Items        []*gen.Item
 	Cubbies      map[string][]*gen.Item
 	SelectedItem *gen.Item
+}
+
+func foo(a ...interface{}) []interface{} {
+	fmt.Println(a)
+	return a
 }
 
 func (s *sortingService) LoadItems(context context.Context, loadRequest *gen.LoadItemsRequest) (*gen.LoadItemsResponse, error) {
@@ -54,12 +69,16 @@ func (s *sortingService) MoveItem(context context.Context, request *gen.MoveItem
 	}
 
 	for cubbyID, items := range s.Cubbies {
-		s.Cubbies[cubbyID] = append(items, s.SelectedItem)
+		if cubbyID == request.Cubby.Id {
+			s.Cubbies[cubbyID] = append(items, s.SelectedItem)
+			logrus.Infof("added item %+v to cubby %v", s.SelectedItem, cubbyID)
+			s.SelectedItem = nil
+			return &gen.MoveItemResponse{}, nil
+
+		}
 	}
 
-	s.SelectedItem = nil
-
-	return &gen.MoveItemResponse{}, nil
+	return nil, fmt.Errorf("unknown cubby")
 }
 
 func (s *sortingService) SelectItem(context.Context, *gen.SelectItemRequest) (*gen.SelectItemResponse, error) {
@@ -69,15 +88,11 @@ func (s *sortingService) SelectItem(context.Context, *gen.SelectItemRequest) (*g
 		return nil, fmt.Errorf("cannot select item because there are no items available")
 	}
 
-	//if s.SelectedItem {
-	//	return nil, fmt.Errorf("item al")
-	//}
-
 	s.SelectedItem = s.getRandomItem()
 
 	randItem := &gen.SelectItemResponse{Item: s.SelectedItem}
 
-	logrus.Infof("Selected item: %s", randItem.Item.Code)
+	logrus.Infof("Selected item with code: %s", s.SelectedItem.Code)
 
 	return randItem, nil
 }
@@ -86,7 +101,6 @@ func (s *sortingService) getRandomItem() *gen.Item {
 	rand.Seed(time.Now().Unix())
 	randInt := rand.Intn(len(s.Items))
 	randItem := s.Items[randInt]
-
 	s.Items = append(s.Items[:randInt], s.Items[randInt+1:]...)
 
 	return randItem
