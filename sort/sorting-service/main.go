@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/Hristiyan-Bonev/golang-course"
+	"github.com/Hristiyan-Bonev/golang-course/sort/gen"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
