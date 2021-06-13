@@ -49,6 +49,7 @@ type sortingService struct {
 func (s *sortingService) LoadItems(context context.Context, loadRequest *gen.LoadItemsRequest) (*gen.LoadItemsResponse, error) {
 
 	if len(loadRequest.Items) == 0 {
+		logrus.Warnf("Request with no items received! Ignoring...")
 		return nil, fmt.Errorf("request contains no items")
 	}
 
@@ -60,6 +61,7 @@ func (s *sortingService) LoadItems(context context.Context, loadRequest *gen.Loa
 
 func (s *sortingService) MoveItem(context context.Context, request *gen.MoveItemRequest) (*gen.MoveItemResponse, error) {
 	if s.SelectedItem == nil {
+		logrus.Warnf("Unable to move item as no item is selected. Ignoring...")
 		return nil, fmt.Errorf("no item selected")
 	}
 
@@ -73,10 +75,15 @@ func (s *sortingService) MoveItem(context context.Context, request *gen.MoveItem
 		}
 	}
 
-	return nil, fmt.Errorf("unknown cubby")
+	return nil, fmt.Errorf("unknown cubby ID:%v", request.Cubby.Id)
 }
 
 func (s *sortingService) SelectItem(context.Context, *gen.SelectItemRequest) (*gen.SelectItemResponse, error) {
+
+	if s.SelectedItem != nil {
+		logrus.Errorf("Unable to pick two items at once.")
+		return nil, fmt.Errorf("item already picked")
+	}
 
 	if len(s.Items) < 1 {
 		logrus.Errorf("Cannot select item! No items available!")
@@ -86,8 +93,7 @@ func (s *sortingService) SelectItem(context.Context, *gen.SelectItemRequest) (*g
 	s.SelectedItem = s.getRandomItem()
 
 	randItem := &gen.SelectItemResponse{Item: s.SelectedItem}
-
-	logrus.Infof("Selected item with code: %s", s.SelectedItem.Code)
+	logrus.Infof("Selected item: %s", s.SelectedItem.Code)
 
 	return randItem, nil
 }
