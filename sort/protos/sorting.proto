@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option go_package = "github.com/Hristiyan-Bonev/golang-course/sort/gen";
-
+package sorting;
 import "types.proto";
 
 service SortingRobot {
