@@ -22,11 +22,12 @@ const (
 )
 
 type sortingService struct {
-	State        RobotState
-	Items        []*gen.Item
-	Cubbies      cubbyList
-	SelectedItem *gen.Item
-	tex          sync.Mutex
+	State              RobotState
+	Items              []*gen.Item
+	Cubbies            cubbyList
+	SelectedItem       *gen.Item
+	tex                sync.Mutex
+	fullfillmentClient gen.FulfillmentClient
 }
 
 func generateCubbies(cubbyIDs ...string) cubbyList {
@@ -42,7 +43,7 @@ func generateCubbies(cubbyIDs ...string) cubbyList {
 func newSortingService() *sortingService {
 
 	return &sortingService{
-		Cubbies: generateCubbies("A1", "A2", "A3", "A4", "A5"),
+		Cubbies: generateCubbies("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"),
 		State:   InitializationState,
 		Items:   []*gen.Item{},
 	}
